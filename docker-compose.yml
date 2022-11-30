@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  www:
+      build: .
+      restart: always
+      ports:
+          - '80:80'
+      volumes:
+        - ./tenant-project:/var/www/html
+      networks:
+        - default
+  db:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_DATABASE: tenant-project
+      MYSQL_USER: tenant_user
+      MYSQL_PASSWORD: tenant102030
+      MYSQL_ROOT_USER: tenant_root_user
+      MYSQL_ROOT_PASSWORD: 102030tenant
+    volumes: 
+      - db_data:/var/lib/mysql
+    networks:
+      - default
+volumes:
+  db_data:
