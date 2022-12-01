@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
     <link rel="stylesheet" href="{{ env('APP_URL') }}/css/login.css" />
-    <script src="{{ env('APP_URL') }}/js/login.js"></script>
+    <script src="{{ env('APP_URL') }}/js/request.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{$tenancy}} - Login CronoDesk</title>
 </head>
@@ -46,13 +46,15 @@
             </div>
 
             <div class="signup hide">
-                <h2>Registro</h2>
-                <div class="inputbox">
-                    <input type="text" name="fullname" placeholder="Nome completo">
-                    <input type="text" name="email" placeholder="Email">
-                    <input type="phone" name="phone" placeholder="Telefone">
-                </div>
-                <button>Enviar</button>
+                <h2>Cadastro</h2>
+                <form onsubmit="sendRegister()">
+                    <div class="inputbox">
+                        <input type="text" name="fullname" id="registerName" placeholder="Nome completo">
+                        <input type="email" name="email" id="registerEmail" placeholder="Email">
+                        <input type="phone" name="phone" id="registerPhone" placeholder="(00) 00000-0000">
+                    </div>
+                    <button type="submit">Enviar</button>
+                </form>
             </div>
 
         </div>
@@ -98,14 +100,6 @@
         $signup.toggleClass("hide");
         $login.toggleClass("hide");
     });
-
-    // setTimeout(function() {
-    //     $("#switch1").click();
-    // }, 1000);
-
-    // setTimeout(function() {
-    //     $("#switch2").click();
-    // }, 2000);
 </script>
 
 <script>
@@ -153,4 +147,41 @@
     });
 
     makeItRain();
+</script>
+
+<script>
+    function sendRegister() {
+        event.preventDefault()
+        let url = "/api/registration"
+        let name = document.getElementById('registerName').value
+        let email = document.getElementById('registerEmail').value
+        let phone = document.getElementById('registerPhone').value
+
+        let body = {
+            "name": name,
+            "email": email,
+            "phone": phone
+        }
+        const call = callFetch(body, url).then(response => console.log(response));
+
+        $("#switch2").click();
+    }
+
+    async function callFetch(body, url) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+        return await response.json()
+    }
+</script>
+
+<script>
+    document.getElementById('registerPhone').addEventListener('input', function(e) {
+        var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+        e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    });
 </script>
