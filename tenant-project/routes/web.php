@@ -16,3 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('auth.login', ["tenancy" => "CronoDesk"]);
 })->name('login');
+
+
+Route::prefix('/painel')->group(function () {
+    Route::get('/dashboard', function(){
+        return view('painel.home');
+    });
+});

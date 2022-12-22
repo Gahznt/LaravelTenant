@@ -6,7 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
     <link rel="stylesheet" href="{{ env('APP_URL') }}/css/login.css" />
-    <script src="{{ env('APP_URL') }}/js/request.js"></script>
+    <script src="{{ env('APP_URL') }}/js/vue.js"></script>
+    <script src="{{ env('APP_URL') }}/js/login.js"></script>
+    @jquery
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{$tenancy}} - Login CronoDesk</title>
 </head>
@@ -16,19 +18,20 @@
     <div class="rain back-row"></div>
 
     <div class="container">
+
         <div class="backbox">
             <div class="loginMsg">
                 <div class="textcontent">
                     <p class="title">Ainda não tem uma conta?</p>
                     <p>Faça uma solicitação agora mesmo.</p>
-                    <button id="switch1">Solicitar acesso</button>
+                    <button id="switch1" onclick="disableButton(1)">Solicitar acesso</button>
                 </div>
             </div>
             <div class="signupMsg visibility">
                 <div class="textcontent">
                     <p class="title">Já tem uma conta?</p>
                     <p>Faça login para acessar o conteúdo.</p>
-                    <button id="switch2">Log in</button>
+                    <button id="switch2" onclick="disableButton(2)">Log in</button>
                 </div>
             </div>
         </div>
@@ -38,8 +41,8 @@
             <div class="login">
                 <h2>Acesso - {{$tenancy}}</h2>
                 <div class="inputbox">
-                    <input type="text" name="email" placeholder="Email">
-                    <input type="password" name="password" placeholder="Senha">
+                    <input type="text" name="email" v-model="texto" placeholder="Email">
+                    <input type="password" name="password" placeholder="password">
                 </div>
                 <p>Esqueceu sua senha?</p>
                 <button>Entrar</button>
@@ -56,9 +59,11 @@
                     <button type="submit">Enviar</button>
                 </form>
             </div>
-
         </div>
         <!-- frontbox -->
+        <div id="app">
+            <div id="snackbar">Some text some message..</div>
+        </div>
     </div>
 
     <svg class="svg-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
@@ -88,6 +93,7 @@
         $frontbox.addClass("moving");
         $signupMsg.toggleClass("visibility");
 
+
         $signup.toggleClass("hide");
         $login.toggleClass("hide");
     });
@@ -100,57 +106,16 @@
         $signup.toggleClass("hide");
         $login.toggleClass("hide");
     });
-</script>
-
-<script>
-    var makeItRain = function() {
-        //clear out everything
-        $('.rain').empty();
-
-        var increment = 0;
-        var drops = "";
-        var backDrops = "";
-
-        while (increment < 100) {
-            //couple random numbers to use for various randomizations
-            //random number between 98 and 1
-            var randoHundo = (Math.floor(Math.random() * (98 - 1 + 1) + 1));
-            //random number between 5 and 2
-            var randoFiver = (Math.floor(Math.random() * (5 - 2 + 1) + 2));
-            //increment
-            increment += randoFiver;
-            //add in a new raindrop with various randomizations to certain CSS properties
-            drops += '<div class="drop" style="left: ' + increment + '%; bottom: ' + (randoFiver + randoFiver - 1 + 100) + '%; animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"><div class="stem" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div><div class="splat" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div></div>';
-            backDrops += '<div class="drop" style="right: ' + increment + '%; bottom: ' + (randoFiver + randoFiver - 1 + 100) + '%; animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"><div class="stem" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div><div class="splat" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div></div>';
-        }
-
-        $('.rain.front-row').append(drops);
-        $('.rain.back-row').append(backDrops);
-    }
-
-    $('.splat-toggle.toggle').on('click', function() {
-        $('body').toggleClass('splat-toggle');
-        $('.splat-toggle.toggle').toggleClass('active');
-        makeItRain();
+    document.getElementById('registerPhone').addEventListener('input', function(e) {
+        var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+        e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
     });
-
-    $('.back-row-toggle.toggle').on('click', function() {
-        $('body').toggleClass('back-row-toggle');
-        $('.back-row-toggle.toggle').toggleClass('active');
-        makeItRain();
-    });
-
-    $('.single-toggle.toggle').on('click', function() {
-        $('body').toggleClass('single-toggle');
-        $('.single-toggle.toggle').toggleClass('active');
-        makeItRain();
-    });
-
     makeItRain();
 </script>
 
 <script>
-    function sendRegister() {
+
+    async function sendRegister() {
         event.preventDefault()
         let url = "/api/registration"
         let name = document.getElementById('registerName').value
@@ -162,26 +127,9 @@
             "email": email,
             "phone": phone
         }
-        const call = callFetch(body, url).then(response => console.log(response));
-
+        const call = await callFetch(body, url);
+        console.log(call)
+        myFunction(call.message)
         $("#switch2").click();
     }
-
-    async function callFetch(body, url) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        })
-        return await response.json()
-    }
-</script>
-
-<script>
-    document.getElementById('registerPhone').addEventListener('input', function(e) {
-        var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-        e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-    });
 </script>
